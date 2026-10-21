@@ -1,0 +1,4 @@
+Asset: nurse-portrait.jpg
+Origin: built-in image_gen tool, generated earlier in this project.
+Subject: fictional nurse, not a real care-team member.
+Prompt: Use case: photorealistic-natural. Asset type: small circular nurse profile photo in a patient app. Create one square photorealistic head-and-shoulders portrait of a fictional friendly female nurse around 40 years old wearing simple blue-grey scrubs, facing the camera with a warm natural smile. Center the face with generous space around the head suitable for a circular crop. Soft natural daylight, unobtrusive pale grey-blue clinic background. Realistic skin texture, understated professional appearance. No text, logos, badge text, borders or watermark.
