@@ -1,11 +1,11 @@
 import {suppliedSessionContext} from './session-context.ts';
 import type {PatientSessionContext} from './session-context.ts';
 export type Mode='voice'|'tap';
-export type Question={text:string;options:string[];sample:string};
+export type Question={text:string;options:string[];sample:string;scale?:{min:number;max:number;lowLabel:string;highLabel:string}};
 export type Bundle={name:string;caption:string;icon:string;tone:string;status:string;questions:Question[];device?:boolean};
 const q=(text:string,options:string[],sample=options[0]):Question=>({text,options,sample});
 export const bundles:Bundle[]=[
- {name:'Joints & Movement',caption:'Joint comfort, stiffness and daily movement',icon:'sun',tone:'focus',status:'Today’s focus',questions:[q('How are your joints feeling this morning?',['Comfortable','A little stiff','More painful'],'A little stiff this morning.'),q('Has the stiffness changed since last week?',['Better','The same','Worse'],'The stiffness feels better than last week.'),q('How has moving around felt today?',['Comfortable','Tiring','Difficult'],'Moving around has felt comfortable today.'),q('Anything you would like your care team to know?',['Nothing today','Add a note'],'Nothing else today, thank you.')]},
+ {name:'Joints & Movement',caption:'Joint comfort, stiffness and daily movement',icon:'sun',tone:'focus',status:'Today’s focus',questions:[{text:'How would you rate your joint pain today?',options:[],sample:'My joint pain is 2 out of 10.',scale:{min:0,max:10,lowLabel:'No pain',highLabel:'Worst pain'}},q('Has the stiffness changed since last week?',['Better','The same','Worse'],'The stiffness feels better than last week.'),q('How has moving around felt today?',['Comfortable','Tiring','Difficult'],'Moving around has felt comfortable today.'),q('Anything you would like your care team to know?',['Nothing today','Add a note'],'Nothing else today, thank you.')]},
  {name:'Medications',caption:'Refill follow-up and daily routine',icon:'pill',tone:'focus',status:'Today’s focus',questions:[q('Have you taken today’s scheduled medicines?',['Yes','Not yet','Missed a dose'],'Yes, I took them this morning.'),q('Any side effects to report?',['None','Yes'],'No side effects to report.'),q('Do you need a refill?',['No','Yes','Not sure'],'Yes, I would like to check on my refill.'),q('Any questions about your medicines?',['No','Add a note'],'No other questions today.')]},
  {name:'Vitals',caption:'Blood pressure and temperature from your devices',icon:'pressure',tone:'ready',status:'Readings ready',device:true,questions:[]},
  {name:'Sleep & recovery',caption:'Sleep quality and recovery',icon:'moon',tone:'due',status:'Due this week',questions:[q('How did you sleep?',['Well','Okay','Poorly']),q('How many hours did you sleep?',['Under 5','5–7','Over 7']),q('Did you wake during the night?',['No','Once','Several times']),q('Do you feel rested?',['Yes','Somewhat','No'])]},
@@ -58,3 +58,6 @@ export const sampleSessionRecords:SessionRecord[]=[
 export type PatientProfile={name:string;age:number;weightKg:number;heightCm:number};
 // Demo values stand in for the profile populated during first signup.
 export const demoPatientProfile:PatientProfile={name:'John',age:67,weightKg:72,heightCm:173};
+
+// Daily sample readings are scoped to each report's Monday–Sunday range.
+export function reportDays(id:string){const report=reportHistory.find(week=>week.id===id);const starts:Record<string,string>={sep20:'2026-09-14',sep27:'2026-09-21',oct04:'2026-09-28',oct11:'2026-10-05',oct18:'2026-10-12'};if(!report||!starts[id])return [];return ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day,index)=>{const date=new Date(`${starts[id]}T12:00:00Z`);date.setUTCDate(date.getUTCDate()+index);return {date:date.toISOString().slice(0,10),day,label:`${day} ${date.getUTCDate()}`,completed:Math.max(0,report.completed-[0,1,0,1,0,0,0][index]),stiffness:report.stiffness+[10,5,0,-5,0,-5,-5][index],sleep:report.sleep+[-.5,0,.5,-.5,0,.5,0][index]};});}

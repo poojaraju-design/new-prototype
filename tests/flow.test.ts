@@ -1,7 +1,7 @@
 import test from 'node:test';
 import {extractSessionContext,suppliedSessionContext} from '../src/session-context.ts';
 import assert from 'node:assert/strict';
-import {bundles,isDone,nextPriority,saveAnswer,reportWeeks,revealOrder,getDemoSessionPlan,wellbeingDemo,sessionSnapshot,upsertSessionRecord,createDemoVitals,getDeviceFollowUp,sampleSessionRecords} from '../src/data.ts';
+import {bundles,isDone,nextPriority,saveAnswer,reportWeeks,reportDays,revealOrder,getDemoSessionPlan,wellbeingDemo,sessionSnapshot,upsertSessionRecord,createDemoVitals,getDeviceFollowUp,sampleSessionRecords} from '../src/data.ts';
 
 test('priority sequence starts with Joints, then Medications and skips device-filled BP',()=>{
  let answers={};assert.equal(nextPriority(answers),0);
@@ -65,3 +65,5 @@ test('vital snapshots retain the device readings for that session',()=>{const re
 test('supplied demo context is reviewed and avoids fabricated answer or vital values',()=>{const record=sampleSessionRecords.find(item=>item.context);assert.ok(record);assert.equal(record.status,'reviewed');assert.equal(record.reviewedAt,undefined);assert.equal(record.feedback,undefined);assert.deepEqual(record.answers,{});assert.deepEqual(record.vitals,[]);assert.ok(record.context?.data.relevant_observations?.[1].observation.includes('93.3%'));assert.deepEqual(record.context?.data.symptoms?.severity_and_timing?.monitoring_course?.map(day=>day.documented_severity),['moderate','moderate','mild']);assert.equal(record.context?.data.medication_compliance?.adherence_events?.[0].follow_up_status,'Documented as taken on 2026-09-21 after the refill arrived.');});
 
 test('context extraction allows only the requested JSON sections',()=>{const source={...suppliedSessionContext.data,treatment_goals:{status:'not_documented'},data_gaps:['hidden'],metadata:{pipeline_mode:'hidden'}};const result=extractSessionContext({context:source});assert.deepEqual(Object.keys(result),['context_summary','symptoms','medication_compliance','relevant_observations','nursing_attention_items']);assert.equal(result.context_summary,source.context_summary);assert.equal('metadata' in result,false);assert.equal('data_gaps' in result,false);assert.equal(extractSessionContext({}).symptoms,undefined);});
+
+test('daily report data has seven dates within the selected week and consistent averages',()=>{for(const [id,start,end] of [['oct18','2026-10-12','2026-10-18'],['oct11','2026-10-05','2026-10-11'],['oct04','2026-09-28','2026-10-04']]){const days=reportDays(id);assert.equal(days.length,7);assert.equal(days[0].date,start);assert.equal(days[6].date,end);assert.deepEqual(days.map(day=>day.day),['Mon','Tue','Wed','Thu','Fri','Sat','Sun']);assert.ok(days.every(day=>day.completed>=0&&day.completed<=5));}assert.deepEqual(reportDays('missing'),[]);});
