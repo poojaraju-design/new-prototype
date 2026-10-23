@@ -1,3 +1,5 @@
+import {suppliedSessionContext} from './session-context.ts';
+import type {PatientSessionContext} from './session-context.ts';
 export type Mode='voice'|'tap';
 export type Question={text:string;options:string[];sample:string};
 export type Bundle={name:string;caption:string;icon:string;tone:string;status:string;questions:Question[];device?:boolean};
@@ -39,17 +41,18 @@ export function getDemoSessionPlan(reply:string,readings:readonly DeviceReading[
   'I would like to talk about my medication refill.':[1,0,2,3,4]
  };
  const concern=reply==='I feel a fever coming on.'?'fever':null;
- const queue=fixtures[reply];return {queue:[...(queue??sessionQueue)],reason:queue||concern?'demo-concern':'default',readingRequest:getDeviceFollowUp(concern,readings)};
+ const queue=concern==='fever'?[2,0,1,3,4]:fixtures[reply];return {queue:[...(queue??sessionQueue)],reason:queue||concern?'demo-concern':'default',readingRequest:getDeviceFollowUp(concern,readings)};
 }
 
 export const wellbeingTiming={greeting:4500,listenLead:650,word:380,replyHold:1000,gettingStarted:1600,handoff:650};
 
-export type SessionRecord={id:string;startedAt:string;updatedAt:string;status:'awaiting'|'reviewed';answers:Answers;skipped:number[];queue:number[];wellbeingReply:string|null;feedback?:string;reviewedAt?:string;sample:boolean;vitals:DeviceReading[]};
+export type SessionRecord={id:string;startedAt:string;updatedAt:string;status:'awaiting'|'reviewed'|'not-recorded';answers:Answers;skipped:number[];queue:number[];wellbeingReply:string|null;feedback?:string;reviewedAt?:string;sample:boolean;vitals:DeviceReading[];context?:PatientSessionContext};
 export function sessionSnapshot(id:string,startedAt:string,answers:Answers,skipped:readonly number[],queue:readonly number[],wellbeingReply:string|null,vitals:readonly DeviceReading[]=demoVitals):SessionRecord{return {id,startedAt,updatedAt:new Date().toISOString(),status:'awaiting',answers:Object.fromEntries(Object.entries(answers).map(([key,values])=>[key,[...values]])),skipped:[...skipped],queue:[...queue],wellbeingReply,sample:false,vitals:vitals.map(reading=>({...reading}))};}
 export function upsertSessionRecord(records:SessionRecord[],record:SessionRecord){return [...records.filter(item=>item.id!==record.id),record].sort((a,b)=>b.startedAt.localeCompare(a.startedAt));}
 export const sampleSessionRecords:SessionRecord[]=[
  {id:'sample-awaiting',startedAt:'2026-10-20T16:15:00.000Z',updatedAt:'2026-10-20T16:20:00.000Z',status:'awaiting',answers:{0:['Comfortable','Better','Comfortable','Nothing today'],1:['Yes','None']},skipped:[1,3,4],queue:[...sessionQueue],wellbeingReply:'I’m feeling okay today.',sample:true,vitals:createDemoVitals('2026-10-20T16:15:00.000Z')},
- {id:'sample-reviewed',startedAt:'2026-10-19T16:05:00.000Z',updatedAt:'2026-10-19T17:30:00.000Z',status:'reviewed',answers:{0:['A little stiff','The same','Tiring','Nothing today'],1:['Yes','None','No','No'],3:['Okay','5–7','Once','Somewhat']},skipped:[4],queue:[...sessionQueue],wellbeingReply:'I’m doing okay today.',feedback:'Thank you for your check-in. I’ve reviewed the information you shared.',reviewedAt:'2026-10-19T17:30:00.000Z',sample:true,vitals:createDemoVitals('2026-10-19T16:05:00.000Z')}
+ {id:'sample-reviewed',startedAt:'2026-10-19T16:05:00.000Z',updatedAt:'2026-10-19T17:30:00.000Z',status:'reviewed',answers:{0:['A little stiff','The same','Tiring','Nothing today'],1:['Yes','None','No','No'],3:['Okay','5–7','Once','Somewhat']},skipped:[4],queue:[...sessionQueue],wellbeingReply:'I’m doing okay today.',feedback:'Thank you for your check-in. I’ve reviewed the information you shared.',reviewedAt:'2026-10-19T17:30:00.000Z',sample:true,vitals:createDemoVitals('2026-10-19T16:05:00.000Z')},
+ {id:'sample-sess_syn_activity_spike_001',startedAt:suppliedSessionContext.updatedAt,updatedAt:suppliedSessionContext.updatedAt,status:'reviewed',answers:{},skipped:[],queue:[],wellbeingReply:null,sample:true,vitals:[],context:suppliedSessionContext}
 ];
 
 export type PatientProfile={name:string;age:number;weightKg:number;heightCm:number};

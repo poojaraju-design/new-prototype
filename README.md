@@ -127,3 +127,7 @@ The latest source is copied into the cloned repository without changing its Git 
 ### Device-reading follow-up
 
 Freshness is a boolean supplied by the device/backend fixture, not a clinical age threshold calculated by the UI. The explicit scripted reply “I feel a fever coming on.” triggers a thermometer request only when temperature is stale or missing. The demo then exposes a clearly labelled simulated thermometer event; there is no field for entering a temperature. A fresh temperature needs no repeat reading. No physical device integration or clinical triage service is connected.
+
+### JSON-based session records
+
+Every My records session detail uses the same five sections under Context: Context summary, Symptoms, Medication compliance, Relevant observations, and Nursing attention items. The supplied synthetic September 21 example is populated only from those fields in the attachment, preserved in `src/session-context.ts`. JSON wording and interpretation boundaries are retained; hashes, pipeline metadata and evidence IDs are not shown. Raw question-and-answer history, extra wellbeing panels and additional invented clinical summaries are not rendered in this view. Session records without structured context show an explicit missing-data message for each section rather than copying another patient's information. The current session's final summary and Answer remaining flow are unchanged.

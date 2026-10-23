@@ -1,6 +1,7 @@
 import test from 'node:test';
+import {extractSessionContext,suppliedSessionContext} from '../src/session-context.ts';
 import assert from 'node:assert/strict';
-import {bundles,isDone,nextPriority,saveAnswer,reportWeeks,revealOrder,getDemoSessionPlan,wellbeingDemo,sessionSnapshot,upsertSessionRecord,createDemoVitals,getDeviceFollowUp} from '../src/data.ts';
+import {bundles,isDone,nextPriority,saveAnswer,reportWeeks,revealOrder,getDemoSessionPlan,wellbeingDemo,sessionSnapshot,upsertSessionRecord,createDemoVitals,getDeviceFollowUp,sampleSessionRecords} from '../src/data.ts';
 
 test('priority sequence starts with Joints, then Medications and skips device-filled BP',()=>{
  let answers={};assert.equal(nextPriority(answers),0);
@@ -60,3 +61,7 @@ test('session snapshots copy answers and queues and upsert by ID with newest ses
 
 test('fever follow-up uses backend freshness, including missing readings, without asking for values',()=>{const fresh=createDemoVitals();assert.equal(getDeviceFollowUp('fever',fresh),null);const stale=fresh.map(reading=>({...reading,fresh:reading.kind!=='temperature'}));assert.equal(getDeviceFollowUp('fever',stale),'temperature');assert.equal(getDeviceFollowUp('fever',[]),'temperature');assert.equal(getDeviceFollowUp(null,stale),null);assert.equal(getDemoSessionPlan('I feel a fever coming on.',stale).readingRequest,'temperature');assert.equal(getDemoSessionPlan('I feel a fever coming on.',fresh).readingRequest,null);});
 test('vital snapshots retain the device readings for that session',()=>{const readings=createDemoVitals('2026-10-23T15:00:00.000Z');const snapshot=sessionSnapshot('vitals','2026-10-23T15:00:00.000Z',{},[],[0,1,2,3,4],null,readings);readings[0].value='changed';assert.equal(snapshot.vitals[0].value,'120/78');assert.equal(snapshot.vitals[1].recordedAt,'2026-10-23T15:00:00.000Z');});
+
+test('supplied demo context is reviewed and avoids fabricated answer or vital values',()=>{const record=sampleSessionRecords.find(item=>item.context);assert.ok(record);assert.equal(record.status,'reviewed');assert.equal(record.reviewedAt,undefined);assert.equal(record.feedback,undefined);assert.deepEqual(record.answers,{});assert.deepEqual(record.vitals,[]);assert.ok(record.context?.data.relevant_observations?.[1].observation.includes('93.3%'));assert.deepEqual(record.context?.data.symptoms?.severity_and_timing?.monitoring_course?.map(day=>day.documented_severity),['moderate','moderate','mild']);assert.equal(record.context?.data.medication_compliance?.adherence_events?.[0].follow_up_status,'Documented as taken on 2026-09-21 after the refill arrived.');});
+
+test('context extraction allows only the requested JSON sections',()=>{const source={...suppliedSessionContext.data,treatment_goals:{status:'not_documented'},data_gaps:['hidden'],metadata:{pipeline_mode:'hidden'}};const result=extractSessionContext({context:source});assert.deepEqual(Object.keys(result),['context_summary','symptoms','medication_compliance','relevant_observations','nursing_attention_items']);assert.equal(result.context_summary,source.context_summary);assert.equal('metadata' in result,false);assert.equal('data_gaps' in result,false);assert.equal(extractSessionContext({}).symptoms,undefined);});
