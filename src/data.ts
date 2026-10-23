@@ -30,7 +30,7 @@ export function reportWeeks(id:string){const end=reportHistory.findIndex(week=>w
 
 // Scripted fixtures simulate a backend decision; these are not clinical triage rules.
 export const wellbeingDemo={question:'Hi John, how are you feeling today? Is there anything new or different you’d like to tell me?',reply:'I’m feeling okay today. Nothing new to report.'};
-export type DeviceReading={kind:'blood-pressure'|'temperature';label:string;value:string;unit:string;recordedAt:string;deviceName:string;fresh:boolean};
+export type DeviceReading={kind:'blood-pressure'|'temperature'|'pulse';label:string;value:string;unit:string;recordedAt:string;deviceName:string;fresh:boolean};
 export function createDemoVitals(recordedAt=new Date().toISOString()):DeviceReading[]{return [{kind:'blood-pressure',label:'Blood pressure',value:'120/78',unit:'mmHg',recordedAt,deviceName:'Blood pressure cuff',fresh:true},{kind:'temperature',label:'Temperature',value:'36.8',unit:'°C',recordedAt,deviceName:'Thermometer',fresh:true}];}
 export const demoVitals=createDemoVitals();
 // Freshness is supplied by the device/backend; the UI does not decide clinical thresholds.
@@ -61,3 +61,26 @@ export const demoPatientProfile:PatientProfile={name:'John',age:67,weightKg:72,h
 
 // Daily sample readings are scoped to each report's Monday–Sunday range.
 export function reportDays(id:string){const report=reportHistory.find(week=>week.id===id);const starts:Record<string,string>={sep20:'2026-09-14',sep27:'2026-09-21',oct04:'2026-09-28',oct11:'2026-10-05',oct18:'2026-10-12'};if(!report||!starts[id])return [];return ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day,index)=>{const date=new Date(`${starts[id]}T12:00:00Z`);date.setUTCDate(date.getUTCDate()+index);return {date:date.toISOString().slice(0,10),day,label:`${day} ${date.getUTCDate()}`,completed:Math.max(0,report.completed-[0,1,0,1,0,0,0][index]),stiffness:report.stiffness+[10,5,0,-5,0,-5,-5][index],sleep:report.sleep+[-.5,0,.5,-.5,0,.5,0][index]};});}
+
+export type RecordVitalHistory={label:string;unit:string;dates:string[];values:string[];status:string;note:string;freshness:'fresh'|'stale'};
+// Freshness is a demo snapshot at session time, independent of clinical status.
+export const suppliedRecordVitalHistory:RecordVitalHistory[]=[
+{label:'Blood pressure',unit:'mmHg',dates:['2026-09-19','2026-09-20','2026-09-21'],values:['122/78','120/76','121/77'],status:'Normal',freshness:'fresh',note:'Stable.'},
+{label:'Pulse rate',unit:'bpm',dates:['2026-09-19','2026-09-20','2026-09-21'],values:['78','76','75'],status:'Normal',freshness:'fresh',note:'Slight downward drift.'},
+{label:'Temperature',unit:'°F',dates:['2026-09-19','2026-09-20','2026-09-21'],values:['98.6','98.5','98.4'],status:'Normal',freshness:'fresh',note:'No fever recorded.'},
+{label:'Oxygen saturation (SpO₂)',unit:'%',dates:['2026-09-19','2026-09-20','2026-09-21'],values:['97','97','97'],status:'Normal',freshness:'fresh',note:'Unchanged.'},
+{label:'Weight',unit:'kg',dates:['2026-09-19','2026-09-20','2026-09-21'],values:['70.4','70.2','70.3'],status:'Normal',freshness:'fresh',note:'Target on file: 65.0 kg; about 5 kg above target. Stable over this period.'}
+];
+
+// Earlier single-reading demo, retained for the Version 2 comparison.
+export const version2DemoVitals:DeviceReading[]=[
+{kind:'temperature',label:'Temperature',value:'98.4',unit:'°F',recordedAt:'2026-09-21T14:55:00-07:00',deviceName:'Thermometer',fresh:true},
+{kind:'blood-pressure',label:'Blood pressure',value:'120/78',unit:'mmHg',recordedAt:'2026-09-21T14:50:00-07:00',deviceName:'Blood pressure monitor',fresh:true},
+{kind:'pulse',label:'Pulse rate',value:'72',unit:'bpm',recordedAt:'2026-09-21T14:50:00-07:00',deviceName:'Blood pressure monitor',fresh:true}
+];
+
+export const exampleNurseReview={name:'Anna Morgan, RN',reviewedAt:'2026-09-21T22:30:00.000Z',notes:[
+'I’ve reviewed your check-in and the information you shared about your joint discomfort and sleep.',
+'I noted that your symptoms are improving, although some discomfort remains.',
+'I’ve recorded the refill delay while you were travelling and that you took your methotrexate dose after the refill arrived.'
+]};

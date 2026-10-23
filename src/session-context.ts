@@ -6,11 +6,16 @@ export type SessionContextData={
  relevant_observations?:{observation:string;interpretation_boundary?:string}[];
  nursing_attention_items?:{attention_type:string;priority?:string;observation:string;nursing_relevance?:string;handoff_or_communication_need?:string;evidence_references?:string[]}[];
 };
-export type PatientSessionContext={specialty:string;updatedAt:string;data:SessionContextData};
+export type PatientSessionContext={specialty:string;updatedAt:string;data:SessionContextData;observationHighlights?:string[];sleepComparison?:{hours:number;nights:number;windowDays:number}[]};
 export function extractSessionContext(payload:{context?:SessionContextData}):SessionContextData{const source=payload.context??{};return {context_summary:source.context_summary,symptoms:source.symptoms,medication_compliance:source.medication_compliance,relevant_observations:source.relevant_observations,nursing_attention_items:source.nursing_attention_items};}
 
 export const suppliedSessionContext:PatientSessionContext = {
   "specialty": "Rheumatology",
+  sleepComparison:[{hours:6.8,nights:22,windowDays:30},{hours:5.6,nights:5,windowDays:7}],
+  observationHighlights:[
+    'The completed session reports approximately 32,000 steps during an unplanned all-day hike versus a usual 5,000 to 6,000 steps per day, as observed through HealthKit.',
+    'The session attributes several disrupted nights to joint discomfort; the aggregate sleep data do not establish cause.'
+  ],
   "updatedAt": "2026-09-21T22:05:00Z",
   "data": {
     "context_summary": "Post-session nursing context: the patient reported hand and knee joint pain/swelling after an unplanned all-day hike and a travel-related methotrexate refill delay. Symptoms remained present but were documented as mildly improving on September 21. Methotrexate was resumed when the refill arrived; folic acid and adalimumab were reported as continued. No fever, rash, or new medication side effects were reported.",
