@@ -25,7 +25,7 @@ npm run build
 npm run preview
 ```
 
-The production build is written to `dist/`. Preview opens on port 4173. The tests exercise ordered progression in both modes, skipped and completed sessions, carousel-only mode selection, draft cancellation, thermometer entry, reports/reminders, and local attachment messages.
+The production build is written to `dist/`. Preview opens on port 4173. The tests exercise ordered progression in both modes, skipped and completed sessions, carousel-only mode selection, draft cancellation, device-only vitals and stale-reading follow-up, reports/reminders, and local attachment messages.
 
 ## Put it in Git
 
@@ -65,11 +65,11 @@ Official deployment references: [Render static sites](https://render.com/docs/st
 
 - Health radar with five cues; version 1 reveals compact names from the inner point outward, retaining earlier names.
 - Hover/focus emphasis with an arrow inside each name label.
-- An ordered session queue drives the six-card carousel. Cards provide context and cannot change the sequence. Device-filled bundles are bypassed; the next eligible bundle opens automatically after a four-second carousel interval.
+- An ordered session queue drives the five-card carousel. Cards provide context and cannot change the sequence. Device-filled bundles are bypassed; the next eligible bundle opens automatically after a four-second carousel interval.
 - Hands-free and Tap to answer are selectable only in the fully visible carousel; each selection restarts the four-second interval. Back from an active bundle retains submitted answers, skips the rest for this session, and advances automatically. Exiting hands-free switches to tap; exiting tap stays in tap. Completed bundles retain their mode. A final summary distinguishes completed, skipped, and device-filled bundles. The queue is local prototype data; no backend is connected.
-- Joints & temperature first, then Medications; device-filled Blood pressure is skipped for questions.
+- Joints & Movement first, then Medications. Vitals groups blood pressure and temperature as device-only readings and is bypassed by the question sequence. Sleep & recovery and Nutrition remain separate bundles.
 - Four scripted assistant/patient turns in hands-free mode. No microphone, speech recognition, or real voice service is used.
-- First temperature question with a draggable thermometer, Celsius/Fahrenheit conversion, explicit confirmation, and a no-reading option.
+- No manual temperature or blood-pressure questions. Vitals displays sample values, units, device names and reading timestamps. Session records preserve their own device-reading snapshots.
 - Weekly report history, visible three-week charts, and sample summary details.
 - Nurse messaging separate from the AI check-in; compact photo/name profile, text composer, photo/file pickers, removable attachment drafts, and downloadable message attachments.
 - Reminders that open the corresponding bundle or weekly report, separate unread badges, and mark-as-read.
@@ -123,3 +123,7 @@ Version 4 uses colors verified from https://www.evolko.com/us/css/theme.css: nav
 ### Local GitHub checkout
 
 The latest source is copied into the cloned repository without changing its Git history. Install using Node 22.12+ or Node 24: `npm ci`, then run `npm test` and `npm run build`. Development uses `npm run dev` on port 5173. The app remains a frontend demo with in-memory state; refreshing the page clears session records, profile edits, and local messages. Profile editing supports local photo previews.
+
+### Device-reading follow-up
+
+Freshness is a boolean supplied by the device/backend fixture, not a clinical age threshold calculated by the UI. The explicit scripted reply “I feel a fever coming on.” triggers a thermometer request only when temperature is stale or missing. The demo then exposes a clearly labelled simulated thermometer event; there is no field for entering a temperature. A fresh temperature needs no repeat reading. No physical device integration or clinical triage service is connected.

@@ -329,3 +329,7 @@
 .version-6.theme-dark .tag.optional{background:#3c3a33;color:#dcd3bc}
 .version-6.theme-dark .bundle-card.completed{background:linear-gradient(155deg,#203d35,#254a3d);border-color:#527965}
 .version-6.theme-dark .message.patient{background:#233b53;border-color:#37506a}
+
+.vitals-readings{margin:14px 0 0}.vitals-readings>div{padding:10px 0;border-bottom:1px solid var(--line)}.vitals-readings>div:last-child{border-bottom:0}.vitals-readings dt{font-size:13px;color:var(--muted)}.vitals-readings dd{margin:5px 0 0;font-size:16px;line-height:1.5}.vitals-readings dd strong{font-weight:600}.vitals-readings dd small{display:block;font-size:11px;color:var(--muted);margin-top:3px}.vitals-readings.compact dt{font-size:12px}.vitals-readings.compact dd{font-size:16px}.device-reading-request{margin-top:18px}.device-reading-request p{font-size:16px;line-height:1.5}.device-reading-request button{margin-top:18px;font-size:14px}.device-reading-request small{display:block;margin-top:10px;font-size:12px;color:var(--muted)}
+
+.version-1 .brand .evolko-brand-logo{width:25px;height:25px;object-fit:cover;border-radius:8px;box-shadow:0 5px 10px #00112a18}
